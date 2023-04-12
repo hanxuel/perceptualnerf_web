@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html><head lang="en"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>&alpha;Surf</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- <meta property="og:image" content="https://d2nerf.github.io/img/title_card.png"> -->
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:type" content="website">
+    <!-- <meta property="og:url" content="https://github.com/d2nerf/d2nerf"> -->
+    <meta property="og:title" content="&alpha;Surf: Implicit Surface Reconstruction for Semi-Transparent and Thin Objects with Decoupled Geometry and Opacity">
+    <meta property="og:description" content="Implicit surface representations such as the signed distance function (SDF) have emerged as a promising approach for image-based surface reconstruction. However, existing optimization methods assume solid surfaces and are therefore unable to properly reconstruct semi-transparent surfaces and thin structures, which also exhibit low opacity due to the blending effect with the background. While neural radiance field (NeRF) based methods can model semi-transparency and achieve photo-realistic quality in synthesized novel views, their volumetric geometry representation tightly couples geometry and opacity, and therefore cannot be easily converted into surfaces without introducing artifacts. We present &alpha;Surf, a novel surface representation with decoupled geometry and opacity for the reconstruction of semi-transparent and thin surfaces where the colors mix. Ray-surface intersections on our representation can be found in closed-form via analytical solutions of cubic polynomials, avoiding Monte-Carlo sampling and is fully differentiable by construction. Our qualitative and quantitative evaluations show that our approach can accurately reconstruct surfaces with semi-transparent and thin parts with fewer artifacts, achieving better reconstruction quality than state-of-the-art SDF and NeRF methods.">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="&alpha;Surf: Implicit Surface Reconstruction for Semi-Transparent and Thin Objects with Decoupled Geometry and Opacity">
+    <meta name="twitter:description" content="Implicit surface representations such as the signed distance function (SDF) have emerged as a promising approach for image-based surface reconstruction. However, existing optimization methods assume solid surfaces and are therefore unable to properly reconstruct semi-transparent surfaces and thin structures, which also exhibit low opacity due to the blending effect with the background. While neural radiance field (NeRF) based methods can model semi-transparency and achieve photo-realistic quality in synthesized novel views, their volumetric geometry representation tightly couples geometry and opacity, and therefore cannot be easily converted into surfaces without introducing artifacts. We present &alpha;Surf, a novel surface representation with decoupled geometry and opacity for the reconstruction of semi-transparent and thin surfaces where the colors mix. Ray-surface intersections on our representation can be found in closed-form via analytical solutions of cubic polynomials, avoiding Monte-Carlo sampling and is fully differentiable by construction. Our qualitative and quantitative evaluations show that our approach can accurately reconstruct surfaces with semi-transparent and thin parts with fewer artifacts, achieving better reconstruction quality than state-of-the-art SDF and NeRF methods.">
+    <!-- <meta name="twitter:image" content="https://d2nerf.github.io/img/title_card.png"> -->
+
+
+    <!-- mirror: F0%9F%AA%9E&lt -->
+    <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22&gt;%E2%9C%A8&lt;/text&gt;&lt;/svg&gt;">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/codemirror.min.css">
+    <link rel="stylesheet" href="css/app.css">
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/codemirror.min.js"></script>
+    <script src="js/clipboard.min.js"></script>
+    <script src="js/video_comparison.js"></script>
+    <script src="js/app.js"></script>
+</head>
+
+<body>
+    <div class="container" id="header" style="text-align: center; margin: auto;">
+        <div class="row" id="title-row" style="max-width: 100%; margin: 0 auto; display: inline-block">
+            <h2 class="col-md-12 text-center" id="title">
+                <!-- <b>D<sup>2</sup>NeRF</b>: Self-Supervised Decoupling of <br>Dynamic and
+                Static Objects from a Monocular Video<br> -->
+                <b>&alpha;Surf</b>: Implicit Surface Reconstruction for Semi-Transparent and Thin Objects with Decoupled Geometry and Opacity
+                <!-- <small>
+                    NeurIPS 2022
+                </small> -->
+            </h2>
+        </div>
+        <div class="row" id="author-row" style="margin:0 auto;">
+            <div class="col-md-12 text-center" style="display: table; margin:0 auto">
+                <table class="author-table" id="author-table">
+                    <tr>
+                        <td>
+                            <a style="text-decoration:none" href="https://chikayan.github.io/">
+                                Tianhao Wu
+                            </a>
+                            <br>University of Cambridge
+                        </td>
+                        <td>
+                            <a style="text-decoration:none" href="https://hanxuel.github.io/">
+                                Hanxue Liang
+                            </a>
+                            <br>University of Cambridge
+                        </td>
+                        <td>
+                            <a style="text-decoration:none" href="https://www.cl.cam.ac.uk/~fz261/">
+                                Fangcheng Zhong
+                            </a>
+                            <br>University of Cambridge
+                        </td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a style="text-decoration:none" href="https://griegler.github.io/">
+                                Gernot Riegler
+                            </a>
+                            <br>Unity
+                        </td>
+                        <td>
+                            <a style="text-decoration:none" href="https://www.crunchbase.com/person/shimon-vainer">
+                                Shimon Vainer
+                            </a>
+                            <br>Unity
+                        </td>
+                        <td>
+                            <a style="text-decoration:none" href="https://www.cl.cam.ac.uk/~aco41/">
+                                Cengiz Oztireli
+                            </a>
+                            <br>Google Research
+                            <br>University of Cambridge
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('author-row').style.maxWidth = document.getElementById("title-row").clientWidth + 'px';
+    </script>
+    <div class="container" id="main">
+        <div class="row">
+                <div class="col-md-4 col-md-offset-4 text-center">
+                    <ul class="nav nav-pills nav-justified">
+                        <li>
+                            <a href="https://arxiv.org/abs/2303.10083">
+                            <img src="./img/paper_icon.png" height="90px">
+                                <h4><strong>Paper (arixv)</strong></h4>
+                            </a>
+                        </li> 
+                        <!-- <li>
+                            <a href="">
+                            <img src="./img/data_icon.webp" height="90px">
+                                <h4><strong>Data</strong></h4>
+                            </a>
+                        </li> -->
+                        <li>
+                            <a href="">
+                            <img src="./img/github_icon.svg" height="90px">
+                                <h4><strong>Code</strong></h4>
+                                Coming Soon
+                            </a>
+                        </li>
+                        <!-- <li>
+                            <a href="">
+                            <img src="./img/youtube_icon.png" height="90px">
+                                <h4><strong>Video</strong></h4>
+                            </a>
+                        </li>-->
+                    </ul>
+                </div>
+                
+        </div>
+
+        
+
+        <!-- <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="video-compare-container" id="balloonDiv">
+                    <video class="video" id="balloon" loop playsinline autoPlay muted src="video/vrig_balloon_wave_crop.mp4" onplay="resizeAndPlay(this)"></video>
+                    
+                    <canvas height=0 class="videoMerge" id="balloonMerge"></canvas>
+                </div>
+			</div>
+        </div> -->
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <!-- Please search on arxiv for an unanonymized version of the paper and supplementary. -->
+
+                
+                <table width="100%">
+                    <div>
+                        <video id="editing-materials" width="100%" playsinline autoplay loop muted style="padding-top: 10px; clip-path: inset(1px 1px);">
+                            <source src="video/circle.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                </table>
+
+            </div>
+        </div>
+
+
+        <!-- <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="video-compare-container" id="waterDiv">
+                    <video class="video" id="water" loop playsinline autoPlay muted src="video/vrig_vrig_water_pour.mp4" onplay="resizeAndPlay(this)"></video>
+                    
+                    <canvas height=0 class="videoMerge" id="waterMerge"></canvas>
+                </div>
+			</div>
+        </div> -->
+
+        <div class="row" height="400">
+            <div class="col-md-8 col-md-offset-2">
+                <!-- <h3>
+                    More results
+                </h3> -->
+
+                <div>
+                    <video id="editing-materials" width="100%" playsinline autoplay loop muted style="padding-top: 10px; clip-path: inset(1px 1px);">
+                        <source src="video/crop.mp4" type="video/mp4" />
+                    </video>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Abstract
+                </h3>
+                <p class="text-justify">
+                    Implicit surface representations such as the signed distance function (SDF) have emerged as a promising approach for image-based surface reconstruction. However, existing optimization methods assume solid surfaces and are therefore unable to properly reconstruct semi-transparent surfaces and thin structures, which also exhibit low opacity due to the blending effect with the background. While neural radiance field (NeRF) based methods can model semi-transparency and achieve photo-realistic quality in synthesized novel views, their volumetric geometry representation tightly couples geometry and opacity, and therefore cannot be easily converted into surfaces without introducing artifacts. We present &alpha;Surf, a novel surface representation with decoupled geometry and opacity for the reconstruction of semi-transparent and thin surfaces where the colors mix. Ray-surface intersections on our representation can be found in closed-form via analytical solutions of cubic polynomials, avoiding Monte-Carlo sampling and is fully differentiable by construction. Our qualitative and quantitative evaluations show that our approach can accurately reconstruct surfaces with semi-transparent and thin parts with fewer artifacts, achieving better reconstruction quality than state-of-the-art SDF and NeRF methods.
+                </p>
+            </div>
+        </div>
+
+        <image src="img/method.png" class="img-responsive" alt="overview" width="70%" style="max-height: 450px;margin:auto;">
+
+
+
+
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <h3>
+                        More results
+                    </h3>
+
+                    <div class="text-justify">
+                        Our method decouples the geometry (surface) and material property (opacity) during reconstruction, 
+                        and hence can model semi-transparent surfaces and thin structures (which exhibit semi-transparency as well due to blending effect) 
+                        without noisy surface artifacts that are commonly seen in NeRF reconstructions:
+                        <br><br>
+                        
+                    </div>
+                    
+                    <table width="100%">
+                        <image src="img/teaser.png" class="img-responsive" alt="overview" width="60%" style="margin:auto;"></image>
+                    </table>
+    
+                </div>
+            </div>
+
+            <!-- <div class="row" height="400">
+                <div class="col-md-8 col-md-offset-2">
+                    <div>
+                        <video id="editing-materials" width="100%" playsinline autoplay loop muted style="padding-top: 10px;">
+                            <source src="video/vrig_balloon_wave_crop_compare_test.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                </div>
+            </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+
+                <div class="col-md-8 col-md-offset-2">
+
+                    <table width="100%">
+                        <tr>
+                            <td align="left" valign="top" width="50%">
+                                    <video class="video" preload="auto" id="shark1" loop playsinline autoPlay muted src="video/shark_scam.mp4" onplay="resizeAndPlayDual(this, 'shark2')"></video>
+                                    
+                                    <canvas height=0 class="videoMerge" id="shark1Merge"></canvas>
+                            </td>
+                            <td align="left" valign="top" width="50%">
+                                    <video class="video" preload="auto" id="shark2" loop playsinline autoPlay muted src="video/shark_scam_compare_dynamic.mp4"></video>
+                                    
+                                    <canvas height=0 class="videoMerge" id="shark2Merge"></canvas>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+                <div class="video-compare-container-small">
+                    <video class="video" id="shark" loop playsinline autoPlay muted src="video/shark_scam.mp4" onplay="resizeAndPlay(this)"></video>
+                    <canvas height=0 class="videoMerge" id="sharkMerge"></canvas>
+                </div> -->
+            </div>
+        </div>
+
+
+
+
+        <!-- <div class="row" height="400">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    More results
+                </h3>
+
+                <div>
+                    <video id="editing-materials" width="100%" playsinline autoplay loop muted style="padding-top: 10px;">
+                        <source src="video/pick_drop_compare_all.mp4" type="video/mp4" />
+                    </video>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="text-justify">
+                    Our method can also remove challenging view-correlated shadows, such as shadows cast by the camera or the photographer:
+                    <br><br>
+                    
+                </div>
+                <div class="video-compare-container" id="camShadowDiv">
+                    <video class="video" id="camShadow" loop playsinline autoPlay muted src="video/camera_shadow_v2.mp4" onplay="resizeAndPlay(this)"></video>
+                    
+                    <canvas height=0 class="videoMerge" id="camShadowMerge"></canvas>
+                </div>
+			</div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="text-justify">
+                    <br><br>
+                    Our method learns decoupled neural radiance fields, we can therefore render separate components from novel view. As a by-product, we better utilize the network capacity and learn more robust dynamic objects in the scene:  
+                    <br><br>
+                </div>
+                <div>
+                    <video id="editing-materials" width="100%" playsinline autoplay loop muted style="padding-top: 10px;">
+                        <source src="video/hypernerf_broom-vcam_compare_nv.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="video-compare-container-small" id="nvDiv">
+                    <video class="video" id="nv" loop playsinline autoPlay muted src="video/hypernerf_broom-vcam_compare_nv_hn.mp4" onplay="resizeAndPlay(this)"></video>
+                    
+                    <canvas height=0 class="videoMerge" id="nvMerge"></canvas>
+                </div>
+			</div>
+        </div>  -->
+
+
+        <!-- <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Video
+                </h3>
+                <div class="text-center">
+                    <div style="position:relative;padding-top:56.25%;">
+                        <iframe src="" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Reflection Direction Parameterization
+                </h3>
+                <div class="text-justify">
+                    Previous approaches directly input the camera's view direction into the MLP to predict outgoing radiance. We show that instead using the reflection of the view direction about the normal makes the emittance function significantly easier to learn and interpolate, greatly improving our results.
+                    
+                    <br><br>
+                    
+                </div>
+                <div class="text-center">
+                    <video id="refdir" width="40%" playsinline autoplay loop muted>
+                        <source src="video/reflection_animation.mp4" type="video/mp4" />
+                    </video>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Integrated Directional Encoding
+                </h3>
+                <div class="text-justify">
+                    We explicitly model object roughness using the expected values of a set of spherical harmonics under a von Mises-Fisher distribution whose concentration parameter varies spatially:
+                </div>
+                <br>
+                <div class="text-center">
+                    <img src="./img/ide.png" width="50%">
+                </div>
+                <br>
+                <div class="text-justify">
+                    We call this <i>Integrated Directional Encoding</i>, and we show experimentally that it allows sharing the emittance functions between points with different roughnesses. It also enables scene editing after training. Theoretically, our encoding is stationary on the sphere, similar to the Euclidean stationarity of NeRF's positional encoding. <br><br>
+                </div>
+                <div class="text-center">
+                    <video id="ide" width="100%" playsinline autoplay controls loop muted>
+                        <source src="video/ide_animation.mp4" type="video/mp4" />
+                    </video>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Additional Synthetic Results
+                </h3>
+                <div class="video-compare-container">
+                    <video class="video" id="musclecar" loop playsinline autoPlay muted src="video/musclecar_mipnerf_ours.mp4" onplay="resizeAndPlay(this)"></video>
+                    <canvas height=0 class="videoMerge" id="musclecarMerge"></canvas>
+                </div>
+			</div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Results on Captured Scenes
+                </h3>
+                Our method also produces accurate renderings and surface normals from captured photographs:
+                <div class="video-compare-container" style="width: 100%">
+                    <video class="video" id="toycar" loop playsinline autoPlay muted src="video/toycar.mp4" onplay="resizeAndPlay(this)"></video>
+                    <canvas height=0 class="videoMerge" id="toycarMerge"></canvas>
+                </div>
+			</div>
+        </div> -->
+
+        <!-- <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Scene Editing
+                </h3>
+                <div class="text-justify">
+                    We show that our structured representation of the directional MLP allows for scene editing after training. Here we show that we can convincingly change material properties.
+                    <br>
+                    We can increase and decrease material roughness:
+                </div>
+
+                <div style="overflow: hidden;">
+                    <video id="editing-materials" width="100%" playsinline autoplay loop muted>
+                        <source src="video/pick_drop_compare_all.mp4" type="video/mp4" />
+                    </video>
+                </div>
+
+                
+
+            </div>
+        </div> -->
+
+        <!-- <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Scene Editing
+                </h3>
+                <div class="text-justify">
+                    We show that our structured representation of the directional MLP allows for scene editing after training. Here we show that we can convincingly change material properties.
+                    <br>
+                    We can increase and decrease material roughness:
+                </div>
+
+                <div style="overflow: hidden;">
+                    <video id="editing-materials" width="100%" playsinline autoplay loop muted style="margin-top: -5%;">
+                        <source src="video/materials_rougher_smoother.mp4" type="video/mp4" />
+                    </video>
+                </div>
+
+                <div class="text-justify">
+                    We can also control the amounts of specular and diffuse colors, or change the diffuse color without affecting the specular reflections:
+                </div>
+                
+                <table width="100%">
+                    <tr>
+                        <td align="left" valign="top" width="50%">
+                            <video id="v2" width="100%" playsinline autoplay loop muted>
+                                <source src="video/car_color2.mp4" type="video/mp4" />
+                            </video>
+                        </td>
+                        <td align="left" valign="top" width="50%">
+                            <video id="v3" width="100%" playsinline autoplay loop muted>
+                                <source src="video/car_color3.mp4" type="video/mp4" />
+                            </video>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+        </div> -->
+
+            
+        <!-- <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Citation
+                </h3>
+                <div class="form-group col-md-10 col-md-offset-1">
+                    <textarea id="bibtex" class="form-control" readonly>
+@article{verbin2021refnerf,
+    title={{Ref-NeRF}: Structured View-Dependent Appearance for
+           Neural Radiance Fields},
+    author={Dor Verbin and Peter Hedman and Ben Mildenhall and
+            Todd Zickler and Jonathan T. Barron and Pratul P. Srinivasan},
+    journal={CVPR},
+    year={2022}
+}</textarea>
+                </div>
+            </div>
+        </div> -->
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Acknowledgements
+                </h3>
+                <p class="text-justify">
+                The website template was borrowed from <a href="https://dorverbin.github.io/refnerf/">Ref-NeRF</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+</body></html>
